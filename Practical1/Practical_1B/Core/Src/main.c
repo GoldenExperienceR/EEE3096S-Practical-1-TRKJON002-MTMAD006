@@ -48,13 +48,7 @@
   int end_time = 0;
   int execution_time = 0;
   uint64_t checksum = 0;
-  int imageSize[][1] = {
-		    {128},
-		    {160},
-		    {192},
-		    {224},
-		    {256}
-		};
+  int imageSize[5] = {128,160,192,224,256};
 
 /* USER CODE END PV */
 
@@ -213,7 +207,7 @@ uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int 
   uint64_t mandelbrot_sum = 0;
     //TODO: Complete the function implementation
   	  checksum = 0;
-  	  int x0, y0, xi, yi, iteration, x, y, temp;
+  	  int x0, y0, xi, yi, iteration, x, y, temp, height, width;
   	  // Defining scaling factor
   	  const int S = 1000000;
   	  //Scaling height and width

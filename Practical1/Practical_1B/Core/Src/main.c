@@ -103,7 +103,8 @@ int main(void)
   start_time = HAL_GetTick();
   
   //TODO: Call the Mandelbrot Function and store the output in the checksum variable defined initially
-  HAL_Delay(1000);
+  HAL_Delay(5000);
+  printf("5 second delay");
 
   //TODO: Record the end time
   end_time = HAL_GetTick();
@@ -207,7 +208,7 @@ uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int 
   uint64_t mandelbrot_sum = 0;
     //TODO: Complete the function implementation
   	  checksum = 0;
-  	  int x0, y0, xi, yi, iteration, x, y, temp, height, width;
+  	  int x0=0, y0=0, xi=0, yi=0, iteration=0, x=0, y=0, temp=0;
   	  // Defining scaling factor
   	  const int S = 1000000;
   	  //Scaling height and width

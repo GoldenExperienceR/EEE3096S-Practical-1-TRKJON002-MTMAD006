@@ -99,7 +99,7 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   //TODO: Turn on LED 0 to signify the start of the operation
-   GPIOB -> ODR |= GPIO_ODR_0;
+   GPIOB -> ODR |= GPIO_ODR_1;
 
   //TODO: Record the start time
   

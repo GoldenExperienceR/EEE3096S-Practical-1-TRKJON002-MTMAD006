@@ -46,6 +46,56 @@ TIM_HandleTypeDef htim16;
 /* USER CODE BEGIN PV */
 // TODO: Define input variables
 
+# define SW0 ((GPIOA->IDR)&GPIO_IDR_0)
+# define SW1 ((GPIOA->IDR)&GPIO_IDR_1)
+# define SW2 ((GPIOA->IDR)&GPIO_IDR_2)
+# define SW3 ((GPIOA->IDR)&GPIO_IDR_3)
+
+
+//Defining a variable o keep track of which pattern we are in.
+int P = 0;
+
+//Pattern 1 direction variable (i.e. d1 = 1 (forward) and d1 = 0 (backward))
+int d1 = 1;
+
+//Defining pattern functions
+void pattern1(){
+
+	//Check if we have just entered pattern 1
+	if(GPIOB->ODR == 0x0000){
+		GPIOB->ODR = 0b00000001;  // Set PA0 the first bit
+		}
+	else{
+		//If moving forward (i.e. right to left)
+		if(d1){
+			if(!(GPIOB->ODR == 0b10000000)){
+			GPIOB->ODR = GPIOB->ODR << 1;}
+			else{
+			 //Once we have reached the turning point we switch directions
+			 d1 = 0;
+			 GPIOB->ODR = GPIOB->ODR >> 1;
+			}
+		}
+		else{
+			// If moving backwards (i.e. left to right)
+			if(!(GPIOB->ODR == 0b00000001)){
+						GPIOB->ODR = GPIOB->ODR >> 1;}
+			else{
+			 //Once we have reached the turning point we switch directions again
+			d1 = 1;
+			GPIOB->ODR = GPIOB->ODR << 1;
+			}
+		}
+
+		}
+
+
+
+
+	}
+
+
+
 
 /* USER CODE END PV */
 
@@ -92,6 +142,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // TODO: Start timer TIM16
+  HAL_TIM_Base_Start_IT(&htim16);
+
 
  
 
@@ -107,6 +159,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // TODO: Check pushbuttons to change timer delay
+
+
 
 
     
@@ -323,9 +377,22 @@ void TIM16_IRQHandler(void)
 
 	// TODO: Change LED pattern
 
+	//Change operating mode depending on which button as pressed
+	//Whenever a button is pressed the corresponding pattern/mode resets.
+	if (!SW1){
+		GPIOB->ODR = 0x0000;
+		P = 1;
+	}
+
+	if (P==1){
+		pattern1();
+	}
+
+	}
 
 
-}
+
+
 
 
 /* USER CODE END 4 */

@@ -132,6 +132,12 @@ void pattern2(){
 
 }
 
+void pattern3(){
+
+	//TADALA: Write code for pattern 3 here
+
+}
+
 
 
 
@@ -425,13 +431,23 @@ void TIM16_IRQHandler(void)
 		GPIOB->ODR = 0x0000;
 		P = 2;
 	}
+	else if(!SW3){
+			GPIOB->ODR = 0x0000;
+			P = 3;
+		}
 
 	if (P==1){
 		pattern1();
 	}
-	else if(P==2){
+	else if (P==2){
 		pattern2();
 	}
+	else if (P==3){
+			pattern3();
+		}
+
+
+
 
 	}
 

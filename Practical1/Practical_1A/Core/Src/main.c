@@ -58,12 +58,20 @@ int P = 0;
 //Pattern 1 direction variable (i.e. d1 = 1 (forward) and d1 = 0 (backward))
 int d1 = 1;
 
+//Pattern 2 direction variable (i.e. d2 = 1 (forward) and d2 = 0 (backward))
+int d2 = 1;
+
+// Pattern 2 display variable. Every bit on this binary variable is toggled before it is assigned to the ODR register.
+// This variable is so patterns 1's logic can be reused with slight allterations for pattern 2
+unsigned int b = 0b00000000;
+
+
+
 //Defining pattern functions
 void pattern1(){
-
 	//Check if we have just entered pattern 1
 	if(GPIOB->ODR == 0x0000){
-		GPIOB->ODR = 0b00000001;  // Set PA0 the first bit
+		GPIOB->ODR = 0b00000001;  // Set the starting position of pattern 1
 		}
 	else{
 		//If moving forward (i.e. right to left)
@@ -86,13 +94,43 @@ void pattern1(){
 			GPIOB->ODR = GPIOB->ODR << 1;
 			}
 		}
-
 		}
-
-
-
-
 	}
+
+void pattern2(){
+	if(GPIOB->ODR == 0x0000){
+		    b = 0b00000001;
+			GPIOB->ODR = ~b;  // Set the starting position of pattern 1
+			}
+		else{
+			//If moving forward (i.e. right to left)
+			if(d2){
+				if(!(b == 0b10000000)){
+				b = b << 1;
+				GPIOB->ODR = ~b;}
+				else{
+				 //Once we have reached the turning point we switch directions
+				 d2 = 0;
+				 b = b >> 1;
+				 GPIOB->ODR = ~b;
+				}
+			}
+			else{
+				// If moving backwards (i.e. left to right)
+				if(!(b == 0b00000001)){
+					b = b >> 1;
+					GPIOB->ODR = ~b;}
+				else{
+				 //Once we have reached the turning point we switch directions again
+				d2 = 1;
+				b = b << 1;
+				GPIOB->ODR = ~b;
+				}
+			}
+			}
+
+
+}
 
 
 
@@ -383,9 +421,16 @@ void TIM16_IRQHandler(void)
 		GPIOB->ODR = 0x0000;
 		P = 1;
 	}
+	else if(!SW2){
+		GPIOB->ODR = 0x0000;
+		P = 2;
+	}
 
 	if (P==1){
 		pattern1();
+	}
+	else if(P==2){
+		pattern2();
 	}
 
 	}

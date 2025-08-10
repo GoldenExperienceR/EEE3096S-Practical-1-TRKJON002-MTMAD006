@@ -23,6 +23,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
 #include "stm32f0xx.h"
+#include <stdlib.h>
+#include <time.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,6 +56,8 @@ TIM_HandleTypeDef htim16;
 
 //Defining a variable o keep track of which pattern we are in.
 int P = 0;
+// signal from ISR to main loop
+volatile uint8_t run_pattern_flag = 0;
 
 //Pattern 1 direction variable (i.e. d1 = 1 (forward) and d1 = 0 (backward))
 int d1 = 1;
@@ -64,7 +68,6 @@ int d2 = 1;
 // Pattern 2 display variable. Every bit on this binary variable is toggled before it is assigned to the ODR register.
 // This variable is so patterns 1's logic can be reused with slight allterations for pattern 2
 unsigned int b = 0b00000000;
-
 
 
 //Defining pattern functions
@@ -134,11 +137,44 @@ void pattern2(){
 
 void pattern3(){
 
-	//TADALA: Write code for pattern 3 here
+	 HAL_Delay((rand() % 1401) + 100); //generate a random time delay between 100 and 1500ms
+
+
+	 //Generate random number between 1 and 255
+	 unsigned char num = (rand() % 255) + 1;
+	 GPIOB->ODR = num;
+
+	 //Finding position of bits set to 1
+	 int positions[8];
+	 int count = 0;
+
+	 for (int i = 0; i < 8; i++) {
+	        if (num & (1 << i)) { // check if bit i is set to 1
+	            positions[count++] = i; // store the position in array
+	        }
+	 }
+
+	 //Randomly clear bits until display is fully cleared
+
+	 while (count > 0) {
+
+		 int randomIndex = rand() % count;          // pick random position from the array
+		 int bitPos = positions[randomIndex];       // get the bit's position
+	     num &= ~(1 << bitPos);                     // clear bit at that position
+
+	     HAL_Delay((rand() % 1401) + 100);          //generate a random time delay between 100 and 1500ms
+	     GPIOB->ODR = num;
+
+	  // Remove the used position from array
+	     for (int j = randomIndex; j < count - 1; j++) {
+	    	 positions[j] = positions[j + 1];
+	     }
+	     count--; // reduce number of stored positions
+
+
+	 }
 
 }
-
-
 
 
 /* USER CODE END PV */
@@ -187,9 +223,11 @@ int main(void)
 
   // TODO: Start timer TIM16
   HAL_TIM_Base_Start_IT(&htim16);
-
-
  
+ // Ensuring starting point for rand() number in pattern 3 is random each time;
+  srand(time(NULL));
+
+
 
   /* USER CODE END 2 */
 
@@ -204,10 +242,13 @@ int main(void)
 
     // TODO: Check pushbuttons to change timer delay
 
-
-
-
-    
+	  if (run_pattern_flag)
+	        {
+	            run_pattern_flag = 0; // reset flag
+	            if (P == 1) pattern1();
+	            else if (P == 2) pattern2();
+	            else if (P == 3) pattern3();
+	        }
 
   }
   /* USER CODE END 3 */
@@ -432,21 +473,21 @@ void TIM16_IRQHandler(void)
 		P = 2;
 	}
 	else if(!SW3){
-			GPIOB->ODR = 0x0000;
-			P = 3;
+		GPIOB->ODR = 0x0000;
+		P = 3;
 		}
 
-	if (P==1){
-		pattern1();
-	}
-	else if (P==2){
-		pattern2();
-	}
-	else if (P==3){
-			pattern3();
-		}
-
-
+//	if (P==1){
+//		pattern1();
+//	}
+//	else if (P==2){
+//		pattern2();
+//	}
+//	else if (P==3){
+//			pattern3();
+//		}
+//
+	 run_pattern_flag = 1;  // signal main loop
 
 
 	}

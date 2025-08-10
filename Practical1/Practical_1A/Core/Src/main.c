@@ -54,6 +54,10 @@ TIM_HandleTypeDef htim16;
 # define SW3 ((GPIOA->IDR)&GPIO_IDR_3)
 
 
+// Define variable to keep track of current delay state (1 = 1s, 0=0.5s)
+int delayState = 0;
+
+
 //Defining a variable o keep track of which pattern we are in.
 int P = 0;
 // signal from ISR to main loop
@@ -66,11 +70,36 @@ int d1 = 1;
 int d2 = 1;
 
 // Pattern 2 display variable. Every bit on this binary variable is toggled before it is assigned to the ODR register.
-// This variable is so patterns 1's logic can be reused with slight allterations for pattern 2
+// This variable is so patterns 1's logic can be reused with slight alterations for pattern 2
 unsigned int b = 0b00000000;
 
 
+
+
+
+//Defining alternating delay function.
+
+void changeDelay(){
+	 int period;
+	 if (delayState == 0) {
+	         // Change to 0.5s period
+	         period = 500 - 1;
+	         delayState = 1;
+	     } else {
+	         // Change to 1s period
+	         period = 1000 - 1;
+	         delayState = 0;
+	     }
+
+	 // Stop timer, set new period, reset counter, restart timer
+	     HAL_TIM_Base_Stop_IT(&htim16);
+	     __HAL_TIM_SET_AUTORELOAD(&htim16, period);
+	     __HAL_TIM_SET_COUNTER(&htim16, 0);
+	     HAL_TIM_Base_Start_IT(&htim16);
+ }
+
 //Defining pattern functions
+
 void pattern1(){
 	//Check if we have just entered pattern 1
 	if(GPIOB->ODR == 0x0000){
@@ -170,8 +199,6 @@ void pattern3(){
 	    	 positions[j] = positions[j + 1];
 	     }
 	     count--; // reduce number of stored positions
-
-
 	 }
 
 }
@@ -241,6 +268,11 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // TODO: Check pushbuttons to change timer delay
+
+	  if(!SW0) changeDelay() ;
+
+
+
 
 	  if (run_pattern_flag)
 	        {

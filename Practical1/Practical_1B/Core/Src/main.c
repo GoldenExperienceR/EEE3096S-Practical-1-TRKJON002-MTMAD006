@@ -44,14 +44,11 @@
 
 /* USER CODE BEGIN PV */
 //TODO: Define and initialise the global varibales required
-/*
-  start_time
-  end_time
-  execution_time 
-  checksum: should be uint64_t
-  initial width and height maybe or you might opt for an array??
-*/
-
+	int start_time = 0;
+	int end_time = 0;
+	int execution_time = 0;
+	uint64_t checksum = 0;
+	int imageSize[5] = {128,160,192,224,256};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,28 +96,36 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   //TODO: Turn on LED 0 to signify the start of the operation
-   GPIOB -> ODR |= GPIO_ODR_1;
+  GPIOB -> ODR |= GPIO_ODR_0;
+
+  int height, width;
+   width = height = imageSize[0];
+   //width = height = imageSize[1];
+   //width = height = imageSize[2];
+   //width = height = imageSize[3];
+//   width = height = imageSize[4];
 
   //TODO: Record the start time
+  start_time = HAL_GetTick();
   
   
   //TODO: Call the Mandelbrot Function and store the output in the checksum variable defined initially
-  
+  checksum = calculate_mandelbrot_fixed_point_arithmetic(width, height, MAX_ITER);
 
   //TODO: Record the end time
-  
+  end_time = HAL_GetTick();
 
   //TODO: Calculate the execution time
-  
+   execution_time = end_time - start_time;
 
   //TODO: Turn on LED 1 to signify the end of the operation
-  
+   GPIOB -> ODR |= GPIO_ODR_1;
 
   //TODO: Hold the LEDs on for a 1s delay
-  
+   HAL_Delay(1000);
 
   //TODO: Turn off the LEDs
-  
+   GPIOB->ODR &=~ (GPIO_ODR_0|GPIO_ODR_1);
 
   /* USER CODE END 2 */
 
@@ -204,18 +209,59 @@ static void MX_GPIO_Init(void)
 uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations){
   uint64_t mandelbrot_sum = 0;
     //TODO: Complete the function implementation
-    
-    return mandelbrot_sum;
+        	  int x0, y0, xi, yi, iteration, x, y, temp;
+        	  // Defining scaling factor
+        	  const int S = 1000000;
+        	  //Scaling height and width
+        	  height = height*S;
+        	  width = width*S;
+
+        	  for(y = 0; y < height - 1*S; y = y + 1*S){
+        		  for(x = 0; x < width - 1*S; x = x + 1*S){
+        			x0 = (((x/width)*S)*3500000)/S - 2500000;
+        			y0 = (((y/height)*S)*2000000)/S - 1000000;
+        			xi = 0;
+        			yi = 0;
+        			iteration = 0;
+        			while((iteration < max_iterations)&&((xi^2)/S + (yi^2)/S <= 4*S)){
+        				temp = (xi^2)/S - (yi^2)/S;
+        				yi = 2*xi*yi/S +y0;
+        				xi = temp + x0;
+        				iteration = iteration + 1;
+        			};
+        			mandelbrot_sum = mandelbrot_sum + iteration;
+        		  };
+        	  };
+          return mandelbrot_sum;
 
 }
 
 //TODO: Mandelbroat using variable type double
-uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations){
-    uint64_t mandelbrot_sum = 0;
-    //TODO: Complete the function implementation
-    
-    return mandelbrot_sum;
-}
+//uint64_t calculate_mandelbrot_double(double width, double height, double max_iterations) {
+//    uint64_t mandelbrot_sum = 0;
+//
+//    for (int py = 0; py < (int)height; py++) {
+//        for (int px = 0; px < (int)width; px++) {
+//            double x0 = ((double)px / width) * 3.5 - 2.5;
+//            double y0 = ((double)py / height) * 2.0 - 1.0;
+//
+//            double xi = 0.0, yi = 0.0;
+//            uint64_t iteration = 0;
+//
+//            while ((iteration < max_iterations) && ((xi * xi + yi * yi) <= 4.0)) {
+//                double temp = xi * xi - yi * yi;
+//                yi = 2.0 * xi * yi + y0;
+//                xi = temp + x0;
+//                iteration++;
+//            }
+//
+//            mandelbrot_sum += iteration;
+//        }
+//    }
+//
+//    return mandelbrot_sum;
+//}
+
 
 /* USER CODE END 4 */
 

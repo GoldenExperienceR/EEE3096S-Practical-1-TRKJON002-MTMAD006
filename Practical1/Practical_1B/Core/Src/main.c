@@ -56,7 +56,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations);
-uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations);
+uint64_t calculate_mandelbrot_double(double width, double height, double max_iterations);
 
 
 /* USER CODE END PFP */
@@ -110,7 +110,8 @@ int main(void)
   
   
   //TODO: Call the Mandelbrot Function and store the output in the checksum variable defined initially
-  checksum = calculate_mandelbrot_fixed_point_arithmetic(width, height, MAX_ITER);
+ checksum = calculate_mandelbrot_fixed_point_arithmetic(width, height, MAX_ITER);
+  //checksum = calculate_mandelbrot_double(width, height, MAX_ITER);
 
   //TODO: Record the end time
   end_time = HAL_GetTick();
@@ -237,30 +238,30 @@ uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int 
 }
 
 //TODO: Mandelbroat using variable type double
-//uint64_t calculate_mandelbrot_double(double width, double height, double max_iterations) {
-//    uint64_t mandelbrot_sum = 0;
-//
-//    for (int py = 0; py < (int)height; py++) {
-//        for (int px = 0; px < (int)width; px++) {
-//            double x0 = ((double)px / width) * 3.5 - 2.5;
-//            double y0 = ((double)py / height) * 2.0 - 1.0;
-//
-//            double xi = 0.0, yi = 0.0;
-//            uint64_t iteration = 0;
-//
-//            while ((iteration < max_iterations) && ((xi * xi + yi * yi) <= 4.0)) {
-//                double temp = xi * xi - yi * yi;
-//                yi = 2.0 * xi * yi + y0;
-//                xi = temp + x0;
-//                iteration++;
-//            }
-//
-//            mandelbrot_sum += iteration;
-//        }
-//    }
-//
-//    return mandelbrot_sum;
-//}
+uint64_t calculate_mandelbrot_double(double width, double height, double max_iterations) {
+    uint64_t mandelbrot_sum = 0;
+
+    for (int py = 0; py < (int)height; py++) {
+        for (int px = 0; px < (int)width; px++) {
+            double x0 = ((double)px / width) * 3.5 - 2.5;
+            double y0 = ((double)py / height) * 2.0 - 1.0;
+
+            double xi = 0.0, yi = 0.0;
+            uint64_t iteration = 0;
+
+            while ((iteration < max_iterations) && ((xi * xi + yi * yi) <= 4.0)) {
+                double temp = xi * xi - yi * yi;
+                yi = 2.0 * xi * yi + y0;
+                xi = temp + x0;
+                iteration++;
+            }
+
+            mandelbrot_sum += iteration;
+        }
+    }
+
+    return mandelbrot_sum;
+}
 
 
 /* USER CODE END 4 */

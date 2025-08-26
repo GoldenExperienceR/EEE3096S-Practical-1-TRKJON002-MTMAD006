@@ -38,14 +38,14 @@ ASM_Main:
 
 main_loop:
 
-    @ Checkin SW0
+    @ Checkin SW0 implements increment of 2
 	LDR R3, [R0, #0x10] @Assigigning logic values of GPIOA IDR pins to R3 (using an offset)
 	MOVS R5, #1 @generating a bitmask for SW0
     ANDS R3, R3, R5@ Taking the current value in R3 comparing it with R5 and storing the result back in R3
     CMP R3, #0 @ Checking if SW0 is pressed - setting conditional flags
     BEQ first_increment @branch to return if SW0 is pressed
 
-    @Checking SW1
+    @Checking SW1 implements
     LDR R3, [R0, #0x10]
     MOVS R5, #2
     ANDS R3, R3, R5
@@ -66,29 +66,32 @@ main_loop:
     CMP R3, #0
     BEQ main_loop
 
-write_leds:
-    MOVS R2, #0
-	STR R2, [R1, #0x14]
-	B main_loop
+
 
 first_increment:
 	ADDS R6, R6, #1
-
+	@B main_loop
 second_increment:
 	ADDS R6, R6, #1
 	MOV R2, R6
 	STR R2, [R1, #0x14]
-@	B main_loop @ Tadala: Remove this after you have implemented the delays
+	@BL LONG_delay_loop @ Tadala: Remove this after you have implemented the delays
 
-delay_loop:
-    LDR R4, LONG_DELAY_CNT   @ load loop count
-delay_loop_dec:
-    SUBS R4, R4, #1          @ decrement counter
-    BNE delay_loop_dec       @ repeat until zero
-    BX LR                    @ return from subroutine
-
+LONG_delay_loop:
+    LDR R4, LONG_DELAY_CNT   @ loading longg dealy value in to register 4
+LONG_delay_loop_dec:
+    SUBS R4, R4, #1          @ decrease the vaalue of register 4 to run the clock
+    BNE LONG_delay_loop_dec       @ repeating subtraction  until value of R4 is zero jumps back to beginning f loop until R4 0
+    @BX LR                    @ return to whereever branch wa called
     B main_loop
 
+SHORT_delay_loop:
+    LDR R7, SHORT_DELAY_CNT   @ loading longg dealy value in to register 7
+SHORT_delay_loop_dec:
+    SUBS R7, R7, #1          @ decrease the vaalue of register 7 to run the clock
+    BNE SHORT_delay_loop_dec       @ repeating subtraction  until value of R7 is zero jumps back to beginning f loop until R7 0
+  @  BX LR                    @ return to whereever branch was called
+    B main_loop
 AA:
 	MOVS R2, #0xAA
 	STR R2, [R1, #0x14]
@@ -104,5 +107,5 @@ GPIOB_BASE:  		.word 0x48000400
 MODER_OUTPUT: 		.word 0x5555
 
 @ TODO: Add your own values for these delays
-LONG_DELAY_CNT: 	.word 1400000
-SHORT_DELAY_CNT: 	.word 0
+LONG_DELAY_CNT: 	.word 1400000 @ 0.7s delay calculatef using 8MHz
+SHORT_DELAY_CNT: 	.word 600000 @0.3s delay calculated using 8MHz

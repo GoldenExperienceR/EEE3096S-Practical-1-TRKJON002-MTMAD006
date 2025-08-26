@@ -45,37 +45,45 @@ main_loop:
     CMP R3, #0 @ Checking if SW0 is pressed - setting conditional flags
     BEQ first_increment @branch to return if SW0 is pressed
 
-    @Checking SW1 implements
+    @Checking SW1 implements fats mode 0.3s
     LDR R3, [R0, #0x10]
     MOVS R5, #2
     ANDS R3, R3, R5
     CMP R3, #0
     BEQ second_increment
 
-	@Checking SW2
+	@Checking SW2 forces AA pattern
     LDR R3, [R0, #0x10]
     MOVS R5, #4
     ANDS R3, R3, R5
     CMP R3, #0
     BEQ AA
 
-    @Checking SW3
+    @Checking SW3 freezez currnet pattern
     LDR R3, [R0, #0x10]
     MOVS R5, #8
     ANDS R3, R3, R5
     CMP R3, #0
     BEQ main_loop
 
+    B second_increment @ to allow for default increment of 1
+
 
 
 first_increment:
 	ADDS R6, R6, #1
-	@B main_loop
 second_increment:
 	ADDS R6, R6, #1
 	MOV R2, R6
 	STR R2, [R1, #0x14]
 	@BL LONG_delay_loop @ Tadala: Remove this after you have implemented the delays
+
+@ compare input of SW3 to  determine delay
+	LDR R3, [R0, #0x10]
+	    MOVS R5, #2
+	    ANDS R3, R3, R5
+	    CMP R3, #0
+	    BEQ SHORT_delay_loop @ skip over long delay to implement 0.3s delay
 
 LONG_delay_loop:
     LDR R4, LONG_DELAY_CNT   @ loading longg dealy value in to register 4
